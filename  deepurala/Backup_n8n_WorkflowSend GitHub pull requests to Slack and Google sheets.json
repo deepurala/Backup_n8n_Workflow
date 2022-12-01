@@ -1,0 +1,188 @@
+{
+  "active": true,
+  "connections": {
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "Slack - Add",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Github Trigger": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2022-11-23T12:14:20.314Z",
+  "hash": "c259ae368ba718834c89a4c9d69b0787",
+  "id": 2,
+  "name": "Send GitHub pull requests to Slack and Google sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "owner": "deepurala",
+        "repository": "n8ntest",
+        "events": [
+          "pull_request"
+        ]
+      },
+      "name": "Github Trigger",
+      "type": "n8n-nodes-base.githubTrigger",
+      "position": [
+        -920,
+        260
+      ],
+      "typeVersion": 1,
+      "id": "9a7e7a6b-46d7-4f74-8a7e-f339b43df78b",
+      "credentials": {
+        "githubApi": {
+          "id": "1",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Github Trigger\"].json[\"body\"][\"pull_request\"][\"_links\"][\"html\"][\"href\"]}}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -560,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "51c6c2ce-28e3-41ca-8895-6e9c62f62b13"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "channel": "#github-triggers",
+        "text": "=A new pull request has been requested by {{$node[\"IF\"].json[\"body\"][\"sender\"][\"login\"]}}",
+        "otherOptions": {},
+        "attachments": []
+      },
+      "name": "Slack - Add",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        -160,
+        140
+      ],
+      "typeVersion": 1,
+      "id": "5680b18f-5327-44d6-9d73-0107485dfeaa",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "6",
+          "name": "Slack account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "upsert",
+        "sheetId": "1UbuwBgPKxNL2sbyYfb6gOTGjXs2rBalYxb6UnWz3AmE",
+        "key": "Request Id",
+        "options": {}
+      },
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -180,
+        440
+      ],
+      "typeVersion": 1,
+      "id": "4c022f33-af7b-4f16-a2aa-3eadbcb3e5b3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "Request Id",
+              "value": "={{$node[\"Github Trigger\"].json[\"body\"][\"pull_request\"][\"id\"]}}"
+            },
+            {
+              "name": "Repo name",
+              "value": "={{$node[\"Github Trigger\"].json[\"body\"][\"repository\"][\"full_name\"]}}"
+            },
+            {
+              "name": "Requested by",
+              "value": "={{$node[\"Github Trigger\"].json[\"body\"][\"pull_request\"][\"user\"][\"login\"]}}"
+            },
+            {
+              "name": "Request Link",
+              "value": "={{$node[\"Github Trigger\"].json[\"body\"][\"pull_request\"][\"html_url\"]}}"
+            },
+            {
+              "name": "Requested Date",
+              "value": "={{$node[\"Github Trigger\"].json[\"body\"][\"pull_request\"][\"created_at\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -560,
+        440
+      ],
+      "typeVersion": 1,
+      "id": "ce29102f-c4e1-431f-9a5e-0cd9aaca113a"
+    }
+  ],
+  "pinData": {},
+  "settings": {},
+  "staticData": {
+    "node:Github Trigger": {
+      "webhookId": 390696098,
+      "webhookEvents": [
+        "pull_request"
+      ]
+    }
+  },
+  "tags": [],
+  "updatedAt": "2022-12-01T10:15:37.000Z"
+}
